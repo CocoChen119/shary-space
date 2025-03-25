@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zixuan Wang - Portfolio</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://unpkg.com/three@0.157.0/build/three.min.js"></script>
+<script src="https://unpkg.com/three@0.157.0/examples/jsm/loaders/GLTFLoader.js"></script>
+<script src="https://unpkg.com/three@0.157.0/examples/jsm/controls/OrbitControls.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css" rel="stylesheet">
+<script>
+tailwind.config = {
+theme: {
+extend: {
+colors: {
+primary: '#00f6ff',
+secondary: '#090909'
+},
+borderRadius: {
+'none': '0px',
+'sm': '4px',
+DEFAULT: '8px',
+'md': '12px',
+'lg': '16px',
+'xl': '20px',
+'2xl': '24px',
+'3xl': '32px',
+'full': '9999px',
+'button': '8px'
+}
+}
+}
+}
+</script>
+<style>
+:where([class^="ri-"])::before { content: "\f3c2"; }
+body {
+font-family: 'Space Grotesk', sans-serif;
+background: #090909;
+color: #fff;
+cursor: none;
+}
+.custom-cursor {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #00f6ff;
+  border-radius: 50%;
+  position: fixed;
+  pointer-events: none;
+  z-index: 9999;
+  transition: transform 0.2s ease;
+}
+.custom-cursor-follower {
+  width: 8px;
+  height: 8px;
+  background: #00f6ff;
+  border-radius: 50%;
+  position: fixed;
+  pointer-events: none;
+  z-index: 9999;
+  transition: transform 0.1s ease;
+}
+.cursor-grow {
+  transform: scale(2);
+  background: rgba(0, 246, 255, 0.1);
+  border-color: rgba(0, 246, 255, 0.5);
+}
+.galaxy-bg {
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+z-index: -1;
+}
+.glow {
+    text-shadow: 0 0 10px rgba(0, 246, 255, 0.5),
+                 0 0 20px rgba(0, 246, 255, 0.3),
+                 0 0 30px rgba(0, 246, 255, 0.2);
+    animation: pulse 2s infinite;
+}
+@keyframes pulse {
+    0% { text-shadow: 0 0 10px rgba(0, 246, 255, 0.5),
+                      0 0 20px rgba(0, 246, 255, 0.3),
+                      0 0 30px rgba(0, 246, 255, 0.2); }
+    50% { text-shadow: 0 0 15px rgba(0, 246, 255, 0.6),
+                       0 0 25px rgba(0, 246, 255, 0.4),
+                       0 0 35px rgba(0, 246, 255, 0.3); }
+    100% { text-shadow: 0 0 10px rgba(0, 246, 255, 0.5),
+                        0 0 20px rgba(0, 246, 255, 0.3),
+                        0 0 30px rgba(0, 246, 255, 0.2); }
+}
+.card {
+background: rgba(255, 255, 255, 0.03);
+backdrop-filter: blur(10px);
+border: 1px solid rgba(255, 255, 255, 0.1);
+transition: all 0.3s ease;
+}
+.card:hover {
+transform: translateY(-5px);
+border-color: rgba(0, 246, 255, 0.3);
+box-shadow: 0 0 20px rgba(0, 246, 255, 0.1);
+}
+@keyframes float {
+0% { transform: translateY(0px); }
+50% { transform: translateY(-20px); }
+100% { transform: translateY(0px); }
+}
+.floating {
+animation: float 6s ease-in-out infinite;
+}
+.nav-link {
+position: relative;
+overflow: hidden;
+}
+.nav-link::after {
+content: '';
+position: absolute;
+bottom: -2px;
+left: 0;
+width: 100%;
+height: 2px;
+background: #00f6ff;
+transform: translateX(-100%);
+transition: transform 0.3s ease;
+}
+.nav-link:hover::after {
+transform: translateX(0);
+}
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(0, 246, 255, 0.1);
+    border-left-color: rgba(0, 246, 255, 1);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto;
+}
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+canvas {
+    width: 100% !important;
+    height: 100% !important;
+    transition: transform 0.3s ease;
+}
+.card:hover canvas {
+    transform: scale(1.05);
+}
+.perspective-text {
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.5s;
+  font-family: 'UnifrakturMaguntia', cursive;
+}
+.cv-section {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.6s ease-out;
+}
+.cv-section.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+#matrix-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    opacity: 0.15;
+}
+</style>
+</head>
+<body class="min-h-screen overflow-x-hidden">
+<canvas id="matrix-canvas" class="fixed top-0 left-0 w-full h-full -z-10"></canvas>
+<div class="custom-cursor"></div>
+<div class="custom-cursor-follower"></div>
+<div class="galaxy-bg" id="galaxy"></div>
+<nav class="fixed top-0 left-0 right-0 z-50 bg-background bg-opacity-90 backdrop-blur-sm">
+<div class="max-w-7xl mx-auto px-6 py-4">
+<div class="flex items-center justify-between">
+  <a href="#" class="text-2xl font-bold text-white hover:text-primary transition-colors">Zixuan Wang</a>
+  <div class="flex items-center space-x-8">
+    <a href="#education" class="nav-link text-white hover:text-primary transition-colors">Education</a>
+    <a href="#work" class="nav-link text-white hover:text-primary transition-colors">Work</a>
+    <a href="#publications" class="nav-link text-white hover:text-primary transition-colors">Publications</a>
+    <a href="#awards" class="nav-link text-white hover:text-primary transition-colors">Awards</a>
+    <a href="#skills" class="nav-link text-white hover:text-primary transition-colors">Skills</a>
+  </div>
+</div>
+</div>
+</nav>
+<main>
+    <!-- Hero Section -->
+    <section id="home" class="min-h-screen flex items-center justify-center relative">
+        <div class="text-center relative z-10">
+            <h1 class="text-8xl font-bold glow perspective-text" data-text="Zixuan Wang">Zixuan Wang</h1>
+            
+            <!-- Social Links -->
+            <div class="flex items-center justify-center space-x-6 mt-6">
+                <a href="https://www.linkedin.com/in/zixuan-wang-9212b01b0/" 
+                   target="_blank" 
+                   class="group relative">
+                    <div class="w-12 h-12 flex items-center justify-center bg-primary bg-opacity-10 rounded-full
+                               group-hover:bg-opacity-20 transition-all duration-300">
+                        <i class="ri-linkedin-fill text-2xl text-primary"></i>
+                    </div>
+                    <span class="absolute -bottom-8 left-1/2 transform -translate-x-1/2 
+                                opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-sm">
+                        LinkedIn
+                    </span>
+                </a>
+                
+                <a href="https://github.com/sharyz119" 
+                   target="_blank"
+                   class="group relative">
+                    <div class="w-12 h-12 flex items-center justify-center bg-primary bg-opacity-10 rounded-full
+                               group-hover:bg-opacity-20 transition-all duration-300">
+                        <i class="ri-github-fill text-2xl text-primary"></i>
+                    </div>
+                    <span class="absolute -bottom-8 left-1/2 transform -translate-x-1/2 
+                                opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-sm">
+                        GitHub
+                    </span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Background Effects -->
+        <div class="absolute inset-0 z-0">
+            <canvas id="matrix-canvas"></canvas>
+        </div>
+        <div class="absolute -top-20 -left-20 w-60 h-60 bg-primary rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
+        <div class="absolute -bottom-20 -right-20 w-60 h-60 bg-primary rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
+    </section>
+
+    <!-- Education Section -->
+    <section id="education" class="min-h-screen py-24">
+        <div class="max-w-7xl mx-auto px-6">
+            <h2 class="text-4xl font-bold text-center mb-16 glow">Education</h2>
+            <div class="grid grid-cols-1 gap-8">
+                <!-- Master VU -->
+                <div class="card p-8 rounded-lg">
+                    <div class="flex items-start space-x-4">
+                        <div class="w-12 h-12 flex items-center justify-center bg-primary bg-opacity-10 rounded-full">
+                            <i class="ri-graduation-cap-line text-primary text-2xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-semibold text-white mb-2">Master's Degree in Artificial Intelligence (AI for Health Track)</h3>
+                            <p class="text-gray-400">Vrije Universiteit Amsterdam, The Netherlands (Sep 2023 - Present)</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Master UESTC -->
+                <div class="card p-8 rounded-lg">
+                    <div class="flex items-start space-x-4">
+                        <div class="w-12 h-12 flex items-center justify-center bg-primary bg-opacity-10 rounded-full">
+                            <i class="ri-graduation-cap-line text-primary text-2xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-semibold text-white mb-2">Master's Degree in Artificial Intelligence</h3>
+                            <p class="text-gray-400">University of Electronic Science and Technology of China (UESTC) (Sep 2020 - 2023)</p>
+                            <p class="text-gray-400 mt-2">Thesis: A Study on the Mapping Relationship and Application of Multi-modal Images</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bachelor -->
+                <div class="card p-8 rounded-lg">
+                    <div class="flex items-start space-x-4">
+                        <div class="w-12 h-12 flex items-center justify-center bg-primary bg-opacity-10 rounded-full">
+                            <i class="ri-graduation-cap-line text-primary text-2xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-semibold text-white mb-2">Bachelor's Degree in Communication Engineering (Outstanding Engineer Class)</h3>
+                            <p class="text-gray-400">Southwest Minzu University (SMU), China (Sep 2015 - Jun 2019)</p>
+                            <p class="text-gray-400 mt-2">Final-year project: Research and Implementation of Visual Classroom Guided Seat Selection System</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Work Experience Section -->
+    <section id="work" class="min-h-screen py-24">
+        <div class="max-w-7xl mx-auto px-6">
+            <h2 class="text-4xl font-bold text-center mb-16 glow">Work Experience</h2>
+            <div class="grid grid-cols-1 gap-8">
+                <!-- Teaching Assistant NLP -->
+                <div class="card p-8 rounded-lg">
+                    <div class="flex items-start space-x-4">
+                        <div class="w-12 h-12 flex items-center justify-center bg-primary bg-opacity-10 rounded-full">
+                            <i class="ri-teacher-line text-primary text-2xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-semibold text-white mb-2">Teaching Assistant of Natural Language Processing</h3>
+                            <p class="text-gray-400">Faculty of Science, Vrije Universiteit Amsterdam (04/2025 - 06/2025)</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Junior Researcher -->
+                <div class="card p-8 rounded-lg">
+                    <div class="flex items-start space-x-4">
+                        <div class="w-12 h-12 flex items-center justify-center bg-primary bg-opacity-10 rounded-full">
+                            <i class="ri-microscope-line text-primary text-2xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-semibold text-white mb-2">Junior Researcher</h3>
+                            <p class="text-gray-400">AI & Behavior lab & IVM, Vrije Universiteit Amsterdam (11/2024 - 08/2025)</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Teaching Assistant UESTC -->
+                <div class="card p-8 rounded-lg">
+                    <div class="flex items-start space-x-4">
+                        <div class="w-12 h-12 flex items-center justify-center bg-primary bg-opacity-10 rounded-full">
+                            <i class="ri-teacher-line text-primary text-2xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-semibold text-white mb-2">Teaching Assistant of Task Payloads Data Fusion Theory and Application</h3>
+                            <p class="text-gray-400">UESTC (02/2022 - 06/2022)</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Publications Section -->
+    <section id="publications" class="min-h-screen py-24">
+        <div class="max-w-7xl mx-auto px-6">
+            <h2 class="text-4xl font-bold text-center mb-16 glow">Publications and Patents</h2>
+            <div class="grid grid-cols-1 gap-8">
+                <!-- Publication 1 -->
+                <div class="card p-8 rounded-lg">
+                    <div class="space-y-4">
+                        <h3 class="text-xl font-semibold text-white">Explicit and implicit models in infrared and visible image fusion</h3>
+                        <p class="text-gray-300">
+                            <span class="text-primary font-semibold">Wang, Z.</span>, and Sun, B. (2022). arXiv preprint arXiv:2206.09581.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Publication 2 -->
+                <div class="card p-8 rounded-lg">
+                    <div class="space-y-4">
+                        <h3 class="text-xl font-semibold text-white">Design of Intelligent Reservation Parking Platform System Based on Microcontrollers</h3>
+                        <p class="text-gray-300">
+                            <span class="text-primary font-semibold">Wang, Z</span> and L. Long, DEStech Transactions on Engineering and Technology Research, p. 5, 2018, Art no. M116, DOI: 10.12783/DTETR/ECAME2017/18373.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Patent 1 -->
+                <div class="card p-8 rounded-lg">
+                    <div class="space-y-4">
+                        <h3 class="text-xl font-semibold text-white">The Seats Selection Guidance System for the Visual Classroom</h3>
+                        <p class="text-gray-300">
+                            Guoqing Su, <span class="text-primary font-semibold">Zixuan Wang</span>, Dengyuan Zeng, Fengbo Wang, Jiahui Yang. Chinese Patent CN207946845U. (October, 2018)
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Patent 2 -->
+                <div class="card p-8 rounded-lg">
+                    <div class="space-y-4">
+                        <h3 class="text-xl font-semibold text-white">An Intelligent Bluetooth Remote Control Lock Based on 51 Single Chip</h3>
+                        <p class="text-gray-300">
+                            Yansong Deng, Wei Xiang, <span class="text-primary font-semibold">Zixuan Wang</span></p>
+                        <p class="text-gray-300">Chinese Patent CN206921174U (January, 2018)</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Awards Section -->
+    <section id="awards" class="min-h-screen py-24">
+        <div class="max-w-7xl mx-auto px-6">
+            <h2 class="text-4xl font-bold text-center mb-16 glow">Selected Honors and Awards</h2>
+            <div class="grid grid-cols-1 gap-6">
+                <!-- Awards with emphasis on percentages -->
+                <div class="card p-6 rounded-lg transform hover:scale-105 transition-all duration-300">
+                    <div class="flex items-start space-x-4">
+                        <div class="w-12 h-12 flex-shrink-0 flex items-center justify-center bg-primary bg-opacity-10 rounded-full">
+                            <i class="ri-award-line text-primary text-2xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-semibold text-white">MIT Summer School 2024 — Amsterdam is Hot</h3>
+                            <p class="text-gray-400">August 2024</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card p-6 rounded-lg transform hover:scale-105 transition-all duration-300">
+                    <div class="flex items-start space-x-4">
+                        <div class="w-12 h-12 flex-shrink-0 flex items-center justify-center bg-primary bg-opacity-10 rounded-full">
+                            <i class="ri-trophy-line text-primary text-2xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-semibold text-white">Hack4Her 2024, Challenge of Booking.com</h3>
+                            <p class="text-gray-400">June 2024</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card p-6 rounded-lg transform hover:scale-105 transition-all duration-300">
+                    <div class="flex items-start space-x-4">
+                        <div class="w-12 h-12 flex-shrink-0 flex items-center justify-center bg-primary bg-opacity-10 rounded-full">
+                            <i class="ri-funds-line text-primary text-2xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-semibold text-white">Scholarship of UESTC</h3>
+                            <p class="text-gray-400">September 2020</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card p-6 rounded-lg transform hover:scale-105 transition-all duration-300">
+                    <div class="flex items-start space-x-4">
+                        <div class="w-12 h-12 flex-shrink-0 flex items-center justify-center bg-primary bg-opacity-10 rounded-full">
+                            <i class="ri-medal-line text-primary text-2xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-semibold text-white">Outstanding Graduate of SMU</h3>
+                            <p class="text-gray-400">December 2018</p>
+                            <p class="text-primary mt-1">Top 10% of graduates</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card p-6 rounded-lg transform hover:scale-105 transition-all duration-300">
+                    <div class="flex items-start space-x-4">
+                        <div class="w-12 h-12 flex-shrink-0 flex items-center justify-center bg-primary bg-opacity-10 rounded-full">
+                            <i class="ri-medal-2-line text-primary text-2xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-semibold text-white">First-class Certificate for All-round Development</h3>
+                            <p class="text-gray-400">Sichuan Province, June 2018</p>
+                            <p class="text-primary mt-1">Top 1% of students</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card p-6 rounded-lg transform hover:scale-105 transition-all duration-300">
+                    <div class="flex items-start space-x-4">
+                        <div class="w-12 h-12 flex-shrink-0 flex items-center justify-center bg-primary bg-opacity-10 rounded-full">
+                            <i class="ri-government-line text-primary text-2xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-semibold text-white">National Scholarship</h3>
+                            <p class="text-gray-400">Chinese Ministry of Education, November 2017</p>
+                            <p class="text-primary mt-1">Top 0.2% of students nationwide</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card p-6 rounded-lg transform hover:scale-105 transition-all duration-300">
+                    <div class="flex items-start space-x-4">
+                        <div class="w-12 h-12 flex-shrink-0 flex items-center justify-center bg-primary bg-opacity-10 rounded-full">
+                            <i class="ri-medal-line text-primary text-2xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-semibold text-white">Honorable Mention in ICM</h3>
+                            <p class="text-gray-400">COMAP, February-May 2017</p>
+                            <p class="text-gray-300 mt-1">Interdisciplinary Contest in Modeling</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card p-6 rounded-lg transform hover:scale-105 transition-all duration-300">
+                    <div class="flex items-start space-x-4">
+                        <div class="w-12 h-12 flex-shrink-0 flex items-center justify-center bg-primary bg-opacity-10 rounded-full">
+                            <i class="ri-trophy-line text-primary text-2xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-semibold text-white">First Prize Winner</h3>
+                            <p class="text-gray-400">3rd China College Students' "Internet+" Entrepreneurship Competition</p>
+                            <p class="text-gray-300 mt-1">March-July 2017</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Skills Section -->
+    <section id="skills" class="min-h-screen py-24">
+        <div class="max-w-7xl mx-auto px-6">
+            <h2 class="text-4xl font-bold text-center mb-16 glow">Academic Skills</h2>
+            
+            <!-- Skills Categories -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Programming & Development -->
+                <div class="card p-8 rounded-lg transform hover:scale-105 transition-all duration-300">
+                    <h3 class="text-xl font-semibold text-primary mb-6 flex items-center">
+                        <i class="ri-code-box-line mr-3 text-2xl"></i>
+                        Programming & Development
+                    </h3>
+                    <div class="flex flex-wrap gap-3">
+                        <span class="px-4 py-2 bg-primary bg-opacity-10 rounded-full text-primary hover:bg-opacity-20 transition-all duration-300">Python</span>
+                        <span class="px-4 py-2 bg-primary bg-opacity-10 rounded-full text-primary hover:bg-opacity-20 transition-all duration-300">C</span>
+                        <span class="px-4 py-2 bg-primary bg-opacity-10 rounded-full text-primary hover:bg-opacity-20 transition-all duration-300">R</span>
+                        <span class="px-4 py-2 bg-primary bg-opacity-10 rounded-full text-primary hover:bg-opacity-20 transition-all duration-300">Unity</span>
+                        <span class="px-4 py-2 bg-primary bg-opacity-10 rounded-full text-primary hover:bg-opacity-20 transition-all duration-300">PyTorch</span>
+                        <span class="px-4 py-2 bg-primary bg-opacity-10 rounded-full text-primary hover:bg-opacity-20 transition-all duration-300">TensorFlow</span>
+                        <span class="px-4 py-2 bg-primary bg-opacity-10 rounded-full text-primary hover:bg-opacity-20 transition-all duration-300">Git</span>
+                    </div>
+                </div>
+
+                <!-- AI & Machine Learning -->
+                <div class="card p-8 rounded-lg transform hover:scale-105 transition-all duration-300">
+                    <h3 class="text-xl font-semibold text-primary mb-6 flex items-center">
+                        <i class="ri-brain-line mr-3 text-2xl"></i>
+                        AI & Machine Learning
+                    </h3>
+                    <div class="flex flex-wrap gap-3">
+                        <span class="px-4 py-2 bg-primary bg-opacity-10 rounded-full text-primary hover:bg-opacity-20 transition-all duration-300">Deep Learning</span>
+                        <span class="px-4 py-2 bg-primary bg-opacity-10 rounded-full text-primary hover:bg-opacity-20 transition-all duration-300">Reinforcement Learning</span>
+                        <span class="px-4 py-2 bg-primary bg-opacity-10 rounded-full text-primary hover:bg-opacity-20 transition-all duration-300">Computer Vision</span>
+                        <span class="px-4 py-2 bg-primary bg-opacity-10 rounded-full text-primary hover:bg-opacity-20 transition-all duration-300">NLP</span>
+                        <span class="px-4 py-2 bg-primary bg-opacity-10 rounded-full text-primary hover:bg-opacity-20 transition-all duration-300">Transformer</span>
+                        <span class="px-4 py-2 bg-primary bg-opacity-10 rounded-full text-primary hover:bg-opacity-20 transition-all duration-300">GANs</span>
+                        <span class="px-4 py-2 bg-primary bg-opacity-10 rounded-full text-primary hover:bg-opacity-20 transition-all duration-300">Neural Networks</span>
+                        <span class="px-4 py-2 bg-primary bg-opacity-10 rounded-full text-primary hover:bg-opacity-20 transition-all duration-300">Multi-Agent Systems</span>
+                    </div>
+                </div>
+
+                <!-- Healthcare AI -->
+                <div class="card p-8 rounded-lg transform hover:scale-105 transition-all duration-300">
+                    <h3 class="text-xl font-semibold text-primary mb-6 flex items-center">
+                        <i class="ri-heart-pulse-line mr-3 text-2xl"></i>
+                        Healthcare AI
+                    </h3>
+                    <div class="flex flex-wrap gap-3">
+                        <span class="px-4 py-2 bg-primary bg-opacity-10 rounded-full text-primary hover:bg-opacity-20 transition-all duration-300">Medical AI</span>
+                        <span class="px-4 py-2 bg-primary bg-opacity-10 rounded-full text-primary hover:bg-opacity-20 transition-all duration-300">Machine Learning in Healthcare</span>
+                        <span class="px-4 py-2 bg-primary bg-opacity-10 rounded-full text-primary hover:bg-opacity-20 transition-all duration-300">Medical Image Analysis</span>
+                        <span class="px-4 py-2 bg-primary bg-opacity-10 rounded-full text-primary hover:bg-opacity-20 transition-all duration-300">Healthcare Data Mining</span>
+                        <span class="px-4 py-2 bg-primary bg-opacity-10 rounded-full text-primary hover:bg-opacity-20 transition-all duration-300">Clinical Decision Support</span>
+                    </div>
+                </div>
+
+                <!-- Research & Analysis -->
+                <div class="card p-8 rounded-lg transform hover:scale-105 transition-all duration-300">
+                    <h3 class="text-xl font-semibold text-primary mb-6 flex items-center">
+                        <i class="ri-flask-line mr-3 text-2xl"></i>
+                        Research & Analysis
+                    </h3>
+                    <div class="flex flex-wrap gap-3">
+                        <span class="px-4 py-2 bg-primary bg-opacity-10 rounded-full text-primary hover:bg-opacity-20 transition-all duration-300">Data Analysis</span>
+                        <span class="px-4 py-2 bg-primary bg-opacity-10 rounded-full text-primary hover:bg-opacity-20 transition-all duration-300">Statistics</span>
+                        <span class="px-4 py-2 bg-primary bg-opacity-10 rounded-full text-primary hover:bg-opacity-20 transition-all duration-300">Uncertainty Quantification</span>
+                        <span class="px-4 py-2 bg-primary bg-opacity-10 rounded-full text-primary hover:bg-opacity-20 transition-all duration-300">Experimental Design</span>
+                        <span class="px-4 py-2 bg-primary bg-opacity-10 rounded-full text-primary hover:bg-opacity-20 transition-all duration-300">Scientific Writing</span>
+                    </div>
+                </div>
+
+                <!-- Emerging Technologies -->
+                <div class="card p-8 rounded-lg transform hover:scale-105 transition-all duration-300">
+                    <h3 class="text-xl font-semibold text-primary mb-6 flex items-center">
+                        <i class="ri-virtual-reality-line mr-3 text-2xl"></i>
+                        Emerging Technologies
+                    </h3>
+                    <div class="flex flex-wrap gap-3">
+                        <span class="px-4 py-2 bg-primary bg-opacity-10 rounded-full text-primary hover:bg-opacity-20 transition-all duration-300">Virtual Reality</span>
+                        <span class="px-4 py-2 bg-primary bg-opacity-10 rounded-full text-primary hover:bg-opacity-20 transition-all duration-300">Robotics</span>
+                        <span class="px-4 py-2 bg-primary bg-opacity-10 rounded-full text-primary hover:bg-opacity-20 transition-all duration-300">Evolutionary Computing</span>
+                        <span class="px-4 py-2 bg-primary bg-opacity-10 rounded-full text-primary hover:bg-opacity-20 transition-all duration-300">Multi-modal Learning</span>
+                    </div>
+                </div>
+
+                <!-- Optimization & Engineering -->
+                <div class="card p-8 rounded-lg transform hover:scale-105 transition-all duration-300">
+                    <h3 class="text-xl font-semibold text-primary mb-6 flex items-center">
+                        <i class="ri-settings-line mr-3 text-2xl"></i>
+                        Optimization & Engineering
+                    </h3>
+                    <div class="flex flex-wrap gap-3">
+                        <span class="px-4 py-2 bg-primary bg-opacity-10 rounded-full text-primary hover:bg-opacity-20 transition-all duration-300">Hyperparameter Tuning</span>
+                        <span class="px-4 py-2 bg-primary bg-opacity-10 rounded-full text-primary hover:bg-opacity-20 transition-all duration-300">Model Optimization</span>
+                        <span class="px-4 py-2 bg-primary bg-opacity-10 rounded-full text-primary hover:bg-opacity-20 transition-all duration-300">System Design</span>
+                        <span class="px-4 py-2 bg-primary bg-opacity-10 rounded-full text-primary hover:bg-opacity-20 transition-all duration-300">Performance Tuning</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<!-- Footer -->
+<footer class="bg-primary bg-opacity-5 mt-12">
+<div class="max-w-7xl mx-auto px-4 py-6">
+  <div class="flex flex-col md:flex-row justify-between items-center">
+    <div class="mb-4 md:mb-0">
+      <h4 class="text-lg font-semibold text-primary">Contact Information</h4>
+      <p class="mt-2 text-gray-300">Email: wangshary18@gmail.com</p>
+    </div>
+    <div class="flex space-x-4">
+      <a href="https://github.com/sharyz119" target="_blank" class="text-gray-300 hover:text-primary transition-colors">
+        <i class="ri-github-fill ri-2x"></i>
+      </a>
+      <a href="https://www.linkedin.com/in/zixuan-wang-9212b01b0/" target="_blank" class="text-gray-300 hover:text-primary transition-colors">
+        <i class="ri-linkedin-box-fill ri-2x"></i>
+      </a>
+    </div>
+  </div>
+  <div class="mt-6 text-center text-sm text-gray-400">
+    © 2024 Zixuan Wang. All rights reserved.
+  </div>
+</div>
+</footer>
+<script>
+// Matrix Rain Effect
+const canvas = document.getElementById('matrix-canvas');
+const ctx = canvas.getContext('2d');
+
+// 设置正确的画布大小
+function setCanvasSize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+setCanvasSize();
+
+const chars = '01';
+const fontSize = 16;
+const columns = Math.floor(window.innerWidth / fontSize);
+const drops = new Array(columns).fill(1);
+
+ctx.font = fontSize + 'px monospace';
+
+function drawMatrix() {
+    ctx.fillStyle = 'rgba(9, 9, 9, 0.05)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    ctx.fillStyle = '#00f6ff';
+    ctx.font = `${fontSize}px monospace`;
+    
+    for(let i = 0; i < drops.length; i++) {
+        const text = chars[Math.floor(Math.random() * chars.length)];
+        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+        
+        if(drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+            drops[i] = 0;
+        }
+        drops[i]++;
+    }
+}
+
+// Galaxy Background
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+const renderer = new THREE.WebGLRenderer({ 
+    alpha: true,
+    antialias: true 
+});
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setClearColor(0x000000, 0);
+document.querySelector('.galaxy-bg').appendChild(renderer.domElement);
+
+// Create stars
+const starGeometry = new THREE.BufferGeometry();
+const starMaterial = new THREE.PointsMaterial({
+    color: 0x00f6ff,
+    size: 0.1,
+    transparent: true,
+    opacity: 0.8
+});
+
+const starsCount = 15000;
+const positions = new Float32Array(starsCount * 3);
+for(let i = 0; i < starsCount * 3; i += 3) {
+    positions[i] = (Math.random() - 0.5) * 2000;
+    positions[i + 1] = (Math.random() - 0.5) * 2000;
+    positions[i + 2] = (Math.random() - 0.5) * 2000;
+}
+
+starGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+const stars = new THREE.Points(starGeometry, starMaterial);
+scene.add(stars);
+camera.position.z = 5;
+
+// Animation loop
+function animate() {
+    requestAnimationFrame(animate);
+    drawMatrix();
+    stars.rotation.x += 0.0002;
+    stars.rotation.y += 0.0002;
+    renderer.render(scene, camera);
+}
+
+// Start animation
+animate();
+
+// Resize handler
+window.addEventListener('resize', () => {
+    setCanvasSize();
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+// Background switch based on scroll
+const homeSection = document.getElementById('home');
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            canvas.style.opacity = '0.15';
+            renderer.domElement.style.opacity = '0';
+        } else {
+            canvas.style.opacity = '0';
+            renderer.domElement.style.opacity = '0.5';
+        }
+    });
+}, { threshold: 0.5 });
+
+observer.observe(homeSection);
+
+// Parallax effect
+document.addEventListener('mousemove', (e) => {
+    const mouseX = e.clientX / window.innerWidth - 0.5;
+    const mouseY = e.clientY / window.innerHeight - 0.5;
+    stars.rotation.y = mouseX * 0.5;
+    stars.rotation.x = mouseY * 0.5;
+});
+
+// Smooth scroll
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+anchor.addEventListener('click', function (e) {
+e.preventDefault();
+document.querySelector(this.getAttribute('href')).scrollIntoView({
+behavior: 'smooth'
+});
+});
+});
+
+// 3D Piano
+function initPiano() {
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, 300/300, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(300, 300);
+    document.getElementById('piano-container').appendChild(renderer.domElement);
+
+    // Add lighting
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+    scene.add(ambientLight);
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    directionalLight.position.set(0, 1, 1);
+    scene.add(directionalLight);
+
+    // Load piano model
+    const loader = new THREE.GLTFLoader();
+    loader.load('/path/to/piano.glb', (gltf) => {
+        const piano = gltf.scene;
+        scene.add(piano);
+        
+        // Add interaction
+        piano.rotation.y = Math.PI / 4;
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableZoom = false;
+        
+        // Animation
+        function animate() {
+            requestAnimationFrame(animate);
+            piano.rotation.y += 0.005;
+            renderer.render(scene, camera);
+        }
+        animate();
+    });
+
+    camera.position.z = 5;
+}
+
+// 3D Violin
+function initViolin() {
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, 300/300, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(300, 300);
+    document.getElementById('violin-container').appendChild(renderer.domElement);
+
+    // Add violin model and interaction logic here
+    // You'll need to load a 3D violin model using GLTFLoader
+    // Add interactive strings that respond to clicks/hover
+    
+    const loader = new THREE.GLTFLoader();
+    loader.load('/path/to/violin.glb', (gltf) => {
+        const violin = gltf.scene;
+        scene.add(violin);
+        
+        // Add interaction
+        violin.rotation.y = Math.PI / 4;
+        const violinControls = new THREE.OrbitControls(camera, renderer.domElement);
+        violinControls.enableZoom = false;
+        
+        // Animation
+        function animate() {
+            requestAnimationFrame(animate);
+            violin.rotation.y += 0.005;
+            renderer.render(scene, camera);
+        }
+        animate();
+    });
+
+    camera.position.z = 5;
+}
+
+function initPalette() {
+    // Similar setup as piano
+}
+
+// Initialize all
+initPiano();
+initViolin();
+initPalette();
+
+// Add hover effects
+const containers = document.querySelectorAll('.card');
+containers.forEach(container => {
+    container.addEventListener('mouseenter', () => {
+        container.querySelector('canvas').style.transform = 'scale(1.1)';
+    });
+    
+    container.addEventListener('mouseleave', () => {
+        container.querySelector('canvas').style.transform = 'scale(1)';
+    });
+});
+
+// Contact Modal functionality
+const contactBtn = document.getElementById('contactBtn');
+const contactModal = document.getElementById('contactModal');
+const closeBtn = contactModal.querySelector('button');
+
+contactBtn.addEventListener('click', () => {
+  contactModal.classList.remove('hidden');
+  // Add fade-in animation
+  contactModal.style.animation = 'fadeIn 0.3s ease-in-out';
+});
+
+closeBtn.addEventListener('click', () => {
+  // Add fade-out animation
+  contactModal.style.animation = 'fadeOut 0.3s ease-in-out';
+  setTimeout(() => {
+    contactModal.classList.add('hidden');
+  }, 300);
+});
+
+// Close modal when clicking outside
+contactModal.addEventListener('click', (e) => {
+  if (e.target === contactModal) {
+    closeBtn.click();
+  }
+});
+
+// Add to your existing styles
+const styles = document.createElement('style');
+styles.textContent = `
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+`;
+document.head.appendChild(styles);
+
+class ModelViewer {
+  constructor(containerId, modelPath, options = {}) {
+    this.container = document.getElementById(containerId);
+    this.modelPath = modelPath;
+    this.options = {
+      rotationSpeed: 0.005,
+      cameraPosition: [0, 0, 5],
+      modelScale: 1,
+      ...options
+    };
+    
+    this.init();
+  }
+  
+  init() {
+    // Scene
+    this.scene = new THREE.Scene();
+    
+    // Camera
+    const aspect = this.container.clientWidth / this.container.clientHeight;
+    this.camera = new THREE.PerspectiveCamera(75, aspect, 0.1, 1000);
+    this.camera.position.set(...this.options.cameraPosition);
+    
+    // Renderer
+    this.renderer = new THREE.WebGLRenderer({ 
+      antialias: true, 
+      alpha: true 
+    });
+    this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
+    this.renderer.setPixelRatio(window.devicePixelRatio);
+    this.container.appendChild(this.renderer.domElement);
+    
+    // Lights
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+    this.scene.add(ambientLight);
+    
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+    directionalLight.position.set(5, 5, 5);
+    this.scene.add(directionalLight);
+    
+    // Controls
+    this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
+    this.controls.enableDamping = true;
+    this.controls.dampingFactor = 0.05;
+    this.controls.enableZoom = false;
+    
+    this.loadModel();
+    this.animate();
+    
+    // Event listeners
+    window.addEventListener('resize', () => this.onWindowResize());
+    this.container.addEventListener('mouseenter', () => this.onMouseEnter());
+    this.container.addEventListener('mouseleave', () => this.onMouseLeave());
+  }
+  
+  loadModel() {
+    const loader = new THREE.GLTFLoader();
+    loader.load(
+      this.modelPath,
+      (gltf) => {
+        this.model = gltf.scene;
+        this.model.scale.setScalar(this.options.modelScale);
+        this.scene.add(this.model);
+        
+        // Center model
+        const box = new THREE.Box3().setFromObject(this.model);
+        const center = box.getCenter(new THREE.Vector3());
+        this.model.position.sub(center);
+        
+        updateLoadingProgress();
+      },
+      (xhr) => {
+        console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+      },
+      (error) => {
+        console.error('An error happened:', error);
+      }
+    );
+  }
+  
+  animate() {
+    requestAnimationFrame(() => this.animate());
+    
+    if (this.model && !this.isHovered) {
+      this.model.rotation.y += this.options.rotationSpeed;
+    }
+    
+    this.controls.update();
+    this.renderer.render(this.scene, this.camera);
+  }
+  
+  onWindowResize() {
+    const aspect = this.container.clientWidth / this.container.clientHeight;
+    this.camera.aspect = aspect;
+    this.camera.updateProjectionMatrix();
+    this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
+  }
+  
+  onMouseEnter() {
+    this.isHovered = true;
+    this.controls.enabled = true;
+  }
+  
+  onMouseLeave() {
+    this.isHovered = false;
+    this.controls.enabled = false;
+  }
+}
+
+// Loading manager
+let loadedModels = 0;
+const totalModels = 3;
+
+function updateLoadingProgress() {
+  loadedModels++;
+  const progress = Math.round((loadedModels / totalModels) * 100);
+  document.getElementById('loading-progress').textContent = `${progress}%`;
+  
+  if (loadedModels === totalModels) {
+    document.getElementById('loading-overlay').style.display = 'none';
+  }
+}
+
+// Initialize models
+window.addEventListener('DOMContentLoaded', () => {
+  const piano = new ModelViewer('piano-container', 'models/piano.glb', {
+    modelScale: 1.5,
+    cameraPosition: [0, 0, 5]
+  });
+
+  const violin = new ModelViewer('violin-container', 'models/violin.glb', {
+    modelScale: 1.2,
+    cameraPosition: [0, 0, 4]
+  });
+
+  const palette = new ModelViewer('palette-container', 'models/palette.glb', {
+    modelScale: 1,
+    cameraPosition: [0, 0, 3]
+  });
+});
+</script>
+</body>
+</html>
